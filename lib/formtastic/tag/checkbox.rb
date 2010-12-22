@@ -107,7 +107,7 @@ module Formtastic
 
             ol.li(li_options) do |li|
               li.label(:for => input_id) do
-                Formtastic::Util.html_safe("#{self.create_check_boxes(input_name, html_options, value, unchecked_value, hidden_fields)} #{escape_html_entities(label)}")
+                Formtastic::Util.html_safe("#{create_check_boxes(input_name, html_options, value, unchecked_value, hidden_fields)} #{escape_html_entities(label)}")
               end
             end
           end

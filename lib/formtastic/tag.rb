@@ -12,15 +12,17 @@ module Formtastic
       @template.content_tag :ol, yield(self)
     end
 
-    def li
-      @template.content_tag :li, yield(self)
+    def li(*args)
+      options = args.extract_options!
+      @template.content_tag :li, yield(self), options
     end
 
     def legend
       @template.content_tag :legend, yield
     end
 
-    def label(options={})
+    def label(*args)
+      options = args.extract_options!
       @template.content_tag :label, yield, options
     end
   end
