@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'rspec_tag_matchers'
+require 'active_support/core_ext/class/inheritable_attributes'
 
 RSpec.configure do |config|
   config.include RspecTagMatchers

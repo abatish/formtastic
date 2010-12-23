@@ -2,7 +2,7 @@
 require File.join(File.dirname(__FILE__), *%w[formtastic i18n])
 require File.join(File.dirname(__FILE__), *%w[formtastic util])
 require File.join(File.dirname(__FILE__), *%w[formtastic tag checkbox])
-require File.join(File.dirname(__FILE__), *%w[formtastic tag])
+require File.join(File.dirname(__FILE__), *%w[formtastic tag_builder])
 require File.join(File.dirname(__FILE__), *%w[formtastic railtie]) if defined?(::Rails::Railtie)
 
 module Formtastic #:nodoc:
@@ -14,6 +14,7 @@ module Formtastic #:nodoc:
                    :inline_order, :custom_inline_order, :file_methods, :priority_countries, :i18n_lookups_by_default, :escape_html_entities_in_hints_and_labels,
                    :default_commit_button_accesskey, :default_inline_error_class, :default_hint_class, :default_error_list_class, :instance_reader => false
 
+    class_inheritable_accessor :tag_builder
     cattr_accessor :custom_namespace
 
     self.default_text_field_size = nil
@@ -38,12 +39,18 @@ module Formtastic #:nodoc:
     self.default_inline_error_class = 'inline-errors'
     self.default_error_list_class = 'errors'
     self.default_hint_class = 'inline-hints'
+    self.tag_builder = Formtastic::TagBuilder
 
     RESERVED_COLUMNS = [:created_at, :updated_at, :created_on, :updated_on, :lock_version, :version]
 
     INLINE_ERROR_TYPES = [:sentence, :list, :first]
 
     attr_accessor :template
+
+    def initialize(*args)
+      super(*args)
+      tag_builder.template = template
+    end
 
     # Returns a suitable form input for the given +method+, using the database column information
     # and other factors (like the method name) to figure out what you probably want.

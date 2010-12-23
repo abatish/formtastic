@@ -1,7 +1,10 @@
 require 'spec_helper'
 
 describe Formtastic::TagBuilder do
-  before(:each) { @builder = Formtastic::TagBuilder.new(ActionView::Base.new) }
+  before(:each) do
+    @builder = Formtastic::TagBuilder.new
+    @builder.template = ActionView::Base.new
+  end
 
   describe '#fieldset' do
     it 'returns a fieldset tag' do
@@ -85,6 +88,25 @@ describe Formtastic::TagBuilder do
 
     it 'returns an OL with an LI, with an OL and an LI containing "bar second level"' do
       @html.should have_tag('ol li ol li','bar second level')
+    end
+  end
+
+  describe '#content' do
+    before(:each) do
+      @html = @builder.ol do |ol|
+        ol.li do |li|
+          li.legend('foo')
+          li.content('bar')
+        end
+      end
+    end
+
+    it 'adds the legend to the LI tag' do
+      @html.should have_tag('ol li legend', 'foo')
+    end
+
+    it 'adds the bar content value to the tag in a block' do
+      @html.should have_tag('ol li', /foo/)
     end
   end
 end
