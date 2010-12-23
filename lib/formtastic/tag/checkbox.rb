@@ -75,59 +75,67 @@ module Formtastic
     # CSS or Javascript to a particular checkbox).
     #
     def check_boxes_input(method, options)
-      # get collection and static values
-      collection = find_collection_for_column(method, options)
-      html_options = options.delete(:input_html) || {}
+      li_options = {}
 
+      html_options    = options.delete(:input_html) || {}
       input_name      = generate_association_input_name(method)
-      hidden_fields   = options.delete(:hidden_fields)
       value_as_class  = options.delete(:value_as_class)
-      unchecked_value = options.delete(:unchecked_value) || ''
-      html_options    = { :name => "#{@object_name}[#{input_name}][]" }.merge(html_options)
-
-      selected_values = find_selected_values_for_column(method, options)
       disabled_option_is_present = options.key?(:disabled)
-      disabled_values = [*options[:disabled]] if disabled_option_is_present
 
-      li_options = value_as_class ? { :class => [method.to_s.singularize, 'default'].join('_') } : {}
+      li_options[:method]          = method
+      li_options[:input_name]      = input_name
+      li_options[:hidden_fields]   = options.delete(:hidden_fields)
+      li_options[:value_as_class]  = value_as_class
+      li_options[:unchecked_value] = options.delete(:unchecked_value) || ''
+      li_options[:html_options]    = { :name => "#{@object_name}[#{input_name}][]" }.merge(html_options)
+
+      li_options[:selected_values] = find_selected_values_for_column(method, options)
+      li_options[:disabled_values] = disabled_option_is_present ? [*options[:disabled]] : []
 
       tag_builder.new.fieldset do |fieldset|
         fieldset.content legend_tag(method, options)
-        fieldset.content self.create_hidden_field_for_check_boxes(input_name, value_as_class) unless hidden_fields
+        fieldset.content self.create_hidden_field_for_check_boxes(input_name, value_as_class) unless li_options[:hidden_fields]
 
-        fieldset.ol do |ol|
-          collection.each do |item|
-            label = item.is_a?(Array) ? item.first : item
-            value = item.is_a?(Array) ? item.last : item
-            input_id = generate_html_id(input_name, value.to_s.gsub(/\s/, '_').gsub(/\W/, '').downcase)
-
-            html_options[:checked] = selected_values.include?(value)
-            html_options[:disabled] = disabled_values.include?(value) if disabled_option_is_present
-            html_options[:id] = input_id
-
-            li_options = value_as_class ? { :class => [method.to_s.singularize, value.to_s.downcase].join('_') } : {}
-
-            ol.li(li_options) do |li|
-              checkbox_html = Formtastic::Util.html_safe("#{self.create_check_boxes(input_name, html_options, value, unchecked_value, hidden_fields)} #{escape_html_entities(label)}")
-              li.label( checkbox_html, :for => input_id )
-            end
-          end
-        end
+        build_check_boxes_ol(fieldset, {:li_options => li_options, :method => method}.merge(options))
       end
     end
 
-    def build_li(ol, item, options)
-      html_options = options[:html_options]
-      input_name = options[:input_name]
-      input_id = options[:input_id]
+    def build_check_boxes_ol(fieldset, options={})
+      collection = find_collection_for_column(options[:method], options)
+
+      fieldset.ol do |ol|
+        collection.each { |item| build_check_box_li(ol, item, options[:li_options]) }
+      end
+    end
+
+    def build_check_box_li(ol, item, options={})
+      # TODO DH: I think this is getting messy. Maybe we can have an html_options method
+      #          that preps all of this stuff instead of building the hash in the
+      #          check_boxes_input method and just passing on to build_ol and then to build_li
+      input_name      = options[:input_name]
+      hidden_fields   = options[:hidden_fields]
+      value_as_class  = options[:value_as_class]
+      unchecked_value = options[:unchecked_value]
+      html_options    = options[:html_options]
+      selected_values = options[:selected_values]
+      disabled_values = options[:disabled_values]
+      method          = options[:method]
 
       label = item.is_a?(Array) ? item.first : item
       value = item.is_a?(Array) ? item.last : item
+
       input_id = generate_html_id(input_name, value.to_s.gsub(/\s/, '_').gsub(/\W/, '').downcase)
 
       html_options[:checked] = selected_values.include?(value)
-      html_options[:disabled] = disabled_values.include?(value) if disabled_option_is_present
+      html_options[:disabled] = disabled_values.include?(value)
       html_options[:id] = input_id
+
+      li_options = value_as_class ? { :class => [method.to_s.singularize, value.to_s.downcase].join('_') } : {}
+      checkbox_html = Formtastic::Util.html_safe("#{self.create_check_boxes(input_name, html_options, value, unchecked_value, hidden_fields)} #{escape_html_entities(label)}")
+
+      ol.li(li_options) do |li|
+        li.label(:for => input_id) { |label| label.content checkbox_html }
+      end
     end
   end
 end
