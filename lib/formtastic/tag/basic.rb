@@ -28,5 +28,50 @@ module Formtastic
       end
       tag.content self.send(self.respond_to?(form_helper_method) ? form_helper_method : :text_field, method, html_options)
     end
+    
+    # Outputs a label and standard Rails text field inside the wrapper.
+    def string_input(method, options)
+      basic_input_helper(:text_field, :string, method, options)
+    end
+
+    # Outputs a label and standard Rails password field inside the wrapper.
+    def password_input(method, options)
+      basic_input_helper(:password_field, :password, method, options)
+    end
+
+    # Outputs a label and standard Rails text field inside the wrapper.
+    def numeric_input(method, options)
+      basic_input_helper(:text_field, :numeric, method, options)
+    end
+
+    # Ouputs a label and standard Rails text area inside the wrapper.
+    def text_input(method, options)
+      basic_input_helper(:text_area, :text, method, options)
+    end
+
+    # Outputs a label and a standard Rails file field inside the wrapper.
+    def file_input(method, options)
+      basic_input_helper(:file_field, :file, method, options)
+    end
+
+    # Outputs a label and a standard Rails email field inside the wrapper.
+    def email_input(method, options)
+      basic_input_helper(:email_field, :email, method, options)
+    end
+
+    # Outputs a label and a standard Rails phone field inside the wrapper.
+    def phone_input(method, options)
+      basic_input_helper(:phone_field, :phone, method, options)
+    end
+
+    # Outputs a label and a standard Rails url field inside the wrapper.
+    def url_input(method, options)
+      basic_input_helper(:url_field, :url, method, options)
+    end
+
+    # Outputs a label and a standard Rails search field inside the wrapper.
+    def search_input(method, options)
+      basic_input_helper(:search_field, :search, method, options)
+    end
   end
 end
