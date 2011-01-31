@@ -1,6 +1,7 @@
 # encoding: utf-8
 require File.join(File.dirname(__FILE__), *%w[formtastic i18n])
 require File.join(File.dirname(__FILE__), *%w[formtastic util])
+require File.join(File.dirname(__FILE__), *%w[formtastic tag basic])
 require File.join(File.dirname(__FILE__), *%w[formtastic tag checkbox])
 require File.join(File.dirname(__FILE__), *%w[formtastic tag_builder])
 require File.join(File.dirname(__FILE__), *%w[formtastic railtie]) if defined?(::Rails::Railtie)
@@ -8,6 +9,7 @@ require File.join(File.dirname(__FILE__), *%w[formtastic railtie]) if defined?(:
 module Formtastic #:nodoc:
 
   class SemanticFormBuilder < ActionView::Helpers::FormBuilder
+    include Formtastic::Basic
     include Formtastic::Checkbox
     class_inheritable_accessor :default_text_field_size, :default_text_area_height, :default_text_area_width, :all_fields_required_by_default, :include_blank_for_select_by_default,
                    :required_string, :optional_string, :inline_errors, :label_str_method, :collection_value_methods, :collection_label_methods, :file_metadata_suffixes,
@@ -641,17 +643,6 @@ module Formtastic #:nodoc:
                     end
 
         if_condition ? !!condition : !condition
-      end
-
-      def basic_input_helper(form_helper_method, type, method, options) #:nodoc:
-        html_options = options.delete(:input_html) || {}
-        html_options = default_string_options(method, type).merge(html_options) if [:numeric, :string, :password, :text, :phone, :search, :url, :email].include?(type)
-        field_id = generate_html_id(method, "")
-        html_options[:id] ||= field_id
-        label_options = options_for_label(options)
-        label_options[:for] ||= html_options[:id]
-        self.label(method, label_options) <<
-        self.send(self.respond_to?(form_helper_method) ? form_helper_method : :text_field, method, html_options)
       end
 
       # Outputs a label and standard Rails text field inside the wrapper.
